@@ -1,5 +1,5 @@
-## Clash for OPNsense Proxy Suite
-A one-click installation program for running Clash, Sing-Box, Tun2socks, and Mosdns on OPNsense. It supports Clash subscription conversion, transparent proxying, and DNS splitting. Comes with a web control interface for configuration modifications, program control, log viewing, etc. Tested on OPNsense 24.7.11.
+## OPNsense Proxy Suite
+A one-click installation program for running Clash, Sing-Box, Tun2socks, and Mosdns on pfSense. It supports Clash subscription conversion, transparent proxying, and DNS splitting. Comes with a web control interface for configuration modifications, program control, log viewing, etc. Tested on pfSense plus 24.11.
 
 ![](images/01.png)
 
@@ -39,7 +39,7 @@ As shown in the figure below:
 
 ## Usage
 Please refer to the following article:  
-[OPNsense代理全家桶安装配置教程](https://pfchina.org/?p=14148)
+[pfSense代理全家桶安装配置教程](https://pfchina.org/?p=14123)
 
 ## FAQs
 If subscription conversion does not work, you can use [SublinkX](https://github.com/gooaclok819/sublinkX) to set up your own platform for subscription conversion.
