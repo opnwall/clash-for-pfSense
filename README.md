@@ -1,4 +1,4 @@
-## OPNsense Proxy Suite
+## pfSense Proxy Suite
 A one-click installation program for running Clash, Sing-Box, Tun2socks, and Mosdns on pfSense. It supports Clash subscription conversion, transparent proxying, and DNS splitting. Comes with a web control interface for configuration modifications, program control, log viewing, etc. Tested on pfSense plus 24.11.
 
 ![](images/01.png)
