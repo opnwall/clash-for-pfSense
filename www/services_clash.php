@@ -6,12 +6,12 @@ include("head.inc");
 
 // 配置文件路径
 $config_file = "/usr/local/etc/clash/config.yaml";
+$log_file = "/var/log/clash.log";
 
 // 消息变量初始化
 $message = "";
 
-// 使用 pfSense 的选项卡函数生成菜单
-
+// 选项卡菜单
 $tab_array = array();
 $tab_array[1] = array(gettext("Clash"), false, "services_clash.php");
 $tab_array[4] = array(gettext("Sing-Box"), false, "services_sing_box.php");
@@ -58,6 +58,9 @@ if ($_POST) {
     if ($action === 'save_config') {
         $config_content = $_POST['config_content'];
         $message = saveConfig($config_file, $config_content);
+    } elseif ($action === 'clear_log') {
+        file_put_contents($log_file, ""); // 清空日志文件
+        $message = "日志已清空！";
     } else {
         $message = handleServiceAction($action);
     }
@@ -126,6 +129,12 @@ $config_content = file_exists($config_file) ? htmlspecialchars(file_get_contents
     </div>
     <div class="form-group">
         <textarea id="log-viewer" rows="10" class="form-control" readonly></textarea>
+        <br>
+        <form method="post">
+            <button type="submit" name="action" value="clear_log" class="btn btn-danger">
+                <i class="fa fa-trash"></i> 清空日志
+            </button>
+        </form>
     </div>
 </div>
 

@@ -1,11 +1,11 @@
 <?php
 header('Content-Type: application/json');
 
-// 检查 sing-box 服务状态
-$service_status = trim(shell_exec("service singbox status"));
+// 检查 Clash 运行状态
+exec("pgrep -f '/usr/local/bin/sing-box'", $output, $return_var);
 
-if (strpos($service_status, 'is running') !== false) {
-    echo json_encode(['status' => 'running']);
+if ($return_var === 0) {
+    echo json_encode(["status" => "running"]);
 } else {
-    echo json_encode(['status' => 'stopped']);
+    echo json_encode(["status" => "stopped"]);
 }

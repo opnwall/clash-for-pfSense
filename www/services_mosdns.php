@@ -6,17 +6,17 @@ include("head.inc");
 
 // 配置文件路径
 $config_file = "/usr/local/etc/mosdns/config.yaml";
+$log_file = "/var/log/mosdns.log";
 
 // 消息变量初始化
 $message = "";
 
-// 使用 pfSense 的选项卡函数生成菜单
-
-$tab_array = array();
-$tab_array[1] = array(gettext("Clash"), false, "services_clash.php");
-$tab_array[4] = array(gettext("Sing-Box"), false, "services_sing_box.php");
-$tab_array[5] = array(gettext("Tun2socks"), false, "services_tun2socks.php");
-$tab_array[2] = array(gettext("MosDNS"), false, "services_mosdns.php");
+// 选项卡菜单
+$tab_array = [];
+$tab_array[] = array(gettext("Clash"), false, "services_clash.php");
+$tab_array[] = array(gettext("Sing-Box"), false, "services_sing_box.php");
+$tab_array[] = array(gettext("Tun2socks"), false, "services_tun2socks.php");
+$tab_array[] = array(gettext("MosDNS"), true, "services_mosdns.php");
 
 display_top_tabs($tab_array);
 
@@ -35,9 +35,9 @@ function handleServiceAction($action)
     }
 
     $messages = [
-        'start' => "MosDNS服务启动成功！",
-        'stop' => "MosDNS服务已停止！",
-        'restart' => "MosDNS服务重启成功！"
+        'start' => "MosDNS 服务启动成功！",
+        'stop' => "MosDNS 服务已停止！",
+        'restart' => "MosDNS 服务重启成功！"
     ];
     return $messages[$action];
 }
@@ -56,18 +56,21 @@ function saveConfig($file, $content)
     return "配置保存失败！";
 }
 
-// 表单提交处理
+// 处理表单提交
 if ($_POST) {
     $action = $_POST['action'];
     if ($action === 'save_config') {
         $config_content = $_POST['config_content'];
         $message = saveConfig($config_file, $config_content);
+    } elseif ($action === 'clear_log') {
+        file_put_contents($log_file, ""); // 清空日志文件
+        $message = "日志已清空！";
     } else {
         $message = handleServiceAction($action);
     }
 }
 
-// 读取配置文件内容
+// 读取配置文件
 $config_content = file_exists($config_file) ? htmlspecialchars(file_get_contents($config_file)) : "配置文件未找到！";
 ?>
 
@@ -78,7 +81,8 @@ $config_content = file_exists($config_file) ? htmlspecialchars(file_get_contents
     </div>
     <?php endif; ?>
 </div>
-<!-- 状态显示 -->
+
+<!-- 服务状态 -->
 <div class="panel panel-default">
     <div class="panel-heading">
         <h2 class="panel-title">服务状态</h2>
@@ -89,6 +93,7 @@ $config_content = file_exists($config_file) ? htmlspecialchars(file_get_contents
         </div>
     </div>
 </div>
+
 <!-- 服务控制 -->
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -108,6 +113,7 @@ $config_content = file_exists($config_file) ? htmlspecialchars(file_get_contents
         </form>
     </div>
 </div>
+
 <!-- 配置管理 -->
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -123,6 +129,7 @@ $config_content = file_exists($config_file) ? htmlspecialchars(file_get_contents
         </form>
     </div>
 </div>
+
 <!-- 日志查看 -->
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -130,29 +137,33 @@ $config_content = file_exists($config_file) ? htmlspecialchars(file_get_contents
     </div>
     <div class="form-group">
         <textarea id="log-viewer" rows="10" class="form-control" readonly></textarea>
+        <br>
+        <form method="post">
+            <button type="submit" name="action" value="clear_log" class="btn btn-danger">
+                <i class="fa fa-trash"></i> 清空日志
+            </button>
+        </form>
     </div>
 </div>
 
 <script>
-// 检查服务状态
 function checkMosdnsStatus() {
-    fetch('/status_mosdns.php', { cache: 'no-store' })
-        .then(response => response.json())
-        .then(data => {
-            const statusElement = document.getElementById('mosdns-status');
-            if (data.status === "running") {
-                statusElement.innerHTML = '<i class="fa fa-check-circle text-success"></i> MosDNS 正在运行';
-                statusElement.className = "alert alert-success";
-            } else {
-                statusElement.innerHTML = '<i class="fa fa-times-circle text-danger"></i> MosDNS 已停止';
-                statusElement.className = "alert alert-danger";
-            }
-        });
+        fetch('/status_mosdns.php')
+            .then(response => response.json())
+            .then(data => {
+                const statusElement = document.getElementById('mosdns-status');
+                if (data.status === "running") {
+                    statusElement.innerHTML = '<i class="fa fa-check-circle text-success"></i> MosDNS 正在运行';
+                    statusElement.className = "alert alert-success";
+                } else {
+                    statusElement.innerHTML = '<i class="fa fa-times-circle text-danger"></i> MosDNS 已停止';
+                    statusElement.className = "alert alert-danger";
+                }
+            });
 }
 
-// 实时刷新日志
 function refreshLogs() {
-    fetch('/status_mosdns_logs.php', { cache: 'no-store' })
+    fetch('/status_mosdns_logs.php')
         .then(response => response.text())
         .then(logContent => {
             const logViewer = document.getElementById('log-viewer');
@@ -167,7 +178,6 @@ function refreshLogs() {
         });
 }
 
-// 页面加载时初始化
 document.addEventListener('DOMContentLoaded', () => {
     checkMosdnsStatus();
     refreshLogs();
