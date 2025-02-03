@@ -28,13 +28,18 @@ function handleServiceAction($action)
         return "无效的操作！";
     }
 
-    exec("service mosdns " . escapeshellarg($action), $output, $return_var);
+    exec("service mosdns " . escapeshellarg($action) . " 2>&1", $output, $return_var);
+    if ($return_var !== 0) {
+        error_log("MosDNS 服务操作失败: " . implode("\n", $output));
+        return "MosDNS 服务操作失败！";
+    }
+
     $messages = [
-        'start' => ["MosDNS服务启动成功！", "MosDNS服务启动失败！"],
-        'stop' => ["MosDNS服务已停止！", "MosDNS服务停止失败！"],
-        'restart' => ["MosDNS服务重启成功！", "MosDNS服务重启失败！"]
+        'start' => "MosDNS服务启动成功！",
+        'stop' => "MosDNS服务已停止！",
+        'restart' => "MosDNS服务重启成功！"
     ];
-    return $return_var === 0 ? $messages[$action][0] : $messages[$action][1];
+    return $messages[$action];
 }
 
 // 配置保存函数
@@ -131,7 +136,7 @@ $config_content = file_exists($config_file) ? htmlspecialchars(file_get_contents
 <script>
 // 检查服务状态
 function checkMosdnsStatus() {
-    fetch('/status_mosdns.php')
+    fetch('/status_mosdns.php', { cache: 'no-store' })
         .then(response => response.json())
         .then(data => {
             const statusElement = document.getElementById('mosdns-status');
@@ -147,7 +152,7 @@ function checkMosdnsStatus() {
 
 // 实时刷新日志
 function refreshLogs() {
-    fetch('/status_mosdns_logs.php')
+    fetch('/status_mosdns_logs.php', { cache: 'no-store' })
         .then(response => response.text())
         .then(logContent => {
             const logViewer = document.getElementById('log-viewer');
@@ -172,29 +177,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <?php include("foot.inc"); ?>
-
-<?php
-/**
- * 从配置文件或数据库加载选项卡内容
- *
- * @return array
- */
-/**
- * 生成 pfSense 选项卡菜单
- *
- * @param array $tabs 选项卡内容
- * @param string $currentPage 当前页面文件名
- * @return array
- */
-function generate_tab_menu(array $tabs, string $currentPage): array
-{
-    $menu = [];
-    foreach ($tabs as $tab) {
-        $menu[] = [
-            'name'   => $tab['text'],
-            'url'    => $tab['url'],
-            'active' => basename($tab['url']) === $currentPage,
-        ];
-    }
-    return $menu;
-}

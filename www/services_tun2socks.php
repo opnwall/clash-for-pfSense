@@ -172,29 +172,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <?php include("foot.inc"); ?>
-
-<?php
-/**
- * 从配置文件或数据库加载选项卡内容
- *
- * @return array
- */
-/**
- * 生成 pfSense 选项卡菜单
- *
- * @param array $tabs 选项卡内容
- * @param string $currentPage 当前页面文件名
- * @return array
- */
-function generate_tab_menu(array $tabs, string $currentPage): array
-{
-    $menu = [];
-    foreach ($tabs as $tab) {
-        $menu[] = [
-            'name'   => $tab['text'],
-            'url'    => $tab['url'],
-            'active' => basename($tab['url']) === $currentPage,
-        ];
-    }
-    return $menu;
-}
